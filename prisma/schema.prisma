@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  full_name    String?
+  phone_number String    @unique
+  province_id  Int?
+  region_id    Int?
+  gender       Gender?
+  status       Boolean   @default(true)
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at   DateTime? @default(now()) @db.Timestamptz(6)
+  Province     Province? @relation(fields: [provinceId], references: [id])
+  provinceId   Int?
+
+  @@map("users")
+}
+
+model Staff {
+  id                    Int      @id @default(autoincrement())
+  uuid                  String   @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  full_name             String
+  username              String   @unique
+  password              String
+  phone_number          String?
+  role_id               Int
+  description           String?
+  token_expiration_days Int      @default(7)
+  created_by            String?
+  updated_by            String?
+  created_at            DateTime @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime @default(now()) @db.Timestamptz(6)
+
+  role Role @relation(fields: [role_id], references: [id])
+
+  @@map("staffs")
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  role_name   String   @unique
+  description String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+  Staff       Staff[]
+
+  @@map("roles")
+}
+
+model Province {
+  id          Int      @id @default(autoincrement())
+  name_en     String   @unique
+  name_la     String   @unique
+  description String?
+  region_id   Int
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  udpated_at  DateTime @default(now()) @db.Timestamptz(6)
+  
+  user        User[]
+  region      Region   @relation(fields: [region_id], references: [id])
+}
+
+model Region {
+  id          Int      @id @default(autoincrement())
+  name_en     String   @unique
+  name_la     String   @unique
+  description String?
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  province Province[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}

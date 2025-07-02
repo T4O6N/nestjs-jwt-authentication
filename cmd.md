@@ -1,0 +1,6 @@
+- npm i --save @nestjs/config
+- npm install --save @nestjs/swagger
+- npm i --save class-validator class-transformer
+- npm install prisma --save-dev
+- npx prisma
+- npx prisma init
